@@ -14,14 +14,14 @@ Provide a `license.json` file in your app's directory.  This file is compared ag
       "name": "Fake Library",
       "author": "John Doe",
       "license": "License",
-      "licenseText": "Text to display about the license"
+      "licenseText": "Text to display about the license",
       "gradlePackage": "com.fake.fakest:myFakeLibrary"
     },
     {
       "name": "Jane's Awesome Library",
       "author": "Jane Doe",
       "license": "License",
-      "licenseText": "Text to display about the license"
+      "licenseText": "Text to display about the license",
       "gradlePackage": "com.jdoe:janes-awesome-library"
     }
   ],
