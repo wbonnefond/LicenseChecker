@@ -10,7 +10,7 @@ class Utils {
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
             } else {
-                throw new GradleException("Could not find " + k.gradlePackage + " in licenses config -- exiting")
+                throw new GradleException("Could not find " + k.gradlePackage + " in licenses.json")
             }
         }
         return dependencies
@@ -22,10 +22,26 @@ class Utils {
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
             } else {
-                throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses config but not a project dependency")
+                throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses.json but not a project dependency")
             }
         }
         return dependencies
+    }
+
+    def static ensureAllDependenciesAccountedFor(dependencies, logger) {
+        if (dependencies.isEmpty()) {
+            logger.info("All dependencies accounted for in licenses.json")
+            return true;
+
+        } else {
+            def count = 0
+            dependencies.each { dep ->
+                logger.debug(dep + " was missing from the licenses.json")
+                count++;
+            }
+            throw new GradleException(count + " packages missing from licenses.json")
+        }
+
     }
 
     def writeOutputFile(parser, directory, directoryParent) {

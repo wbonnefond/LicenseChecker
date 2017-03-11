@@ -2,8 +2,11 @@ package com.wardbonnefond.licensechecker
 
 import org.gradle.api.GradleException
 import org.junit.Test
+import org.slf4j.LoggerFactory
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
+
 
 class UtilsTest {
 
@@ -32,9 +35,6 @@ class UtilsTest {
         dependencies.add("com.android.support:support-v4")
 
         def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
-
-        println(jsonConfigFile.absolutePath)
-
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
@@ -51,10 +51,9 @@ class UtilsTest {
         dependencies.add("com.android.support:support-v4")
 
         def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
-
-
         def json = new JsonParser()
         json.parse(jsonConfigFile)
+
         Utils.checkAttributions(json, dependencies)
     }
 
@@ -65,11 +64,9 @@ class UtilsTest {
         dependencies.add("com.android.support:support-v4")
 
         def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
-        println(jsonConfigFile.absolutePath)
-
-
         def json = new JsonParser()
         json.parse(jsonConfigFile)
+
         assertEquals(0, Utils.checkExcludedPackages(json, dependencies).size())
     }
 
@@ -79,11 +76,22 @@ class UtilsTest {
         dependencies.add("com.android.support:appcompat-v7")
 
         def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
-        println(jsonConfigFile.absolutePath)
-
-
         def json = new JsonParser()
         json.parse(jsonConfigFile)
+        
         assertEquals(1, Utils.checkExcludedPackages(json, dependencies).size())
+    }
+
+    @Test
+    void testAllDependenciesAccountedFor() {
+        Set<String> dependencies = new HashSet<>();
+        assertTrue(Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class)))
+    }
+
+    @Test(expected = GradleException.class)
+    void testAllDependenciesAccountedFor_NonEmptySet() {
+        Set<String> dependencies = new HashSet<>();
+        dependencies.add("com.fake.fakelibrary")
+        Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class))
     }
 }

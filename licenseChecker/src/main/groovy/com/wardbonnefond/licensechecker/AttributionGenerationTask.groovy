@@ -1,7 +1,6 @@
 package com.wardbonnefond.licensechecker
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
@@ -13,8 +12,6 @@ class AttributionGenerationTask extends DefaultTask {
 
     @TaskAction
     def generateLicenseAttributions(IncrementalTaskInputs inputs) {
-        println inputs.incremental ? "CHANGED inputs considered out of date"
-                : "ALL inputs considered out of date"
         if (!inputs.isIncremental() && outputFile.exists()) {
             project.delete(outputFile)
         }
@@ -27,35 +24,15 @@ class AttributionGenerationTask extends DefaultTask {
         configParser.parse(configFile)
 
         // Check the attributions
-        configParser.jsonConfig.licenses.each { k ->
-
-            if (dependenciesMap.contains(k.gradlePackage)) {
-                dependenciesMap.remove(k.gradlePackage)
-            } else {
-                throw new GradleException("Could not find " + k.gradlePackage + " in licenses config -- exiting")
-            }
-        }
+        dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap)
 
         // Check the excluded packages
-        configParser.jsonConfig.excludedPackages.each { k ->
+        dependenciesMap = Utils.checkExcludedPackages(configParser, dependenciesMap)
 
-            if (dependenciesMap.contains(k.gradlePackage)) {
-                dependenciesMap.remove(k.gradlePackage)
-            } else {
-                throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses config but not a project dependency")
-            }
-        }
+        // Ensure no dependencies are still in the set
+        Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger)
 
-        if (dependenciesMap.isEmpty()) {
-            println("All dependencies accounted for in licenses config")
-
-        } else {
-            dependenciesMap.each { dep ->
-                println(dep + " was missing from the licenses config")
-            }
-        }
-
-        // build the License file
+        // build the HTML file
         String finalHtml = new File(project.parent.projectDir, "/licenseChecker/base-html").text
 
         String html = new File(project.parent.projectDir, "/licenseChecker/individual-license-html").text
