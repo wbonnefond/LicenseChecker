@@ -27,7 +27,14 @@ class AttributionGenerationTask extends DefaultTask {
         configParser.parse(configFile)
 
         // Check the attributions
-        dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap)
+        configParser.jsonConfig.licenses.each { k ->
+
+            if (dependenciesMap.contains(k.gradlePackage)) {
+                dependenciesMap.remove(k.gradlePackage)
+            } else {
+                throw new GradleException("Could not find " + k.gradlePackage + " in licenses config -- exiting")
+            }
+        }
 
         // Check the excluded packages
         configParser.jsonConfig.excludedPackages.each { k ->
@@ -49,23 +56,21 @@ class AttributionGenerationTask extends DefaultTask {
         }
 
         // build the License file
-        String finalHtml = new File(project.parent.projectDir, "/licenseChecker/html-top").text
-        String htmlBottom = new File(project.parent.projectDir, "/licenseChecker/html-bottom").text
+        String finalHtml = new File(project.parent.projectDir, "/licenseChecker/base-html").text
 
         String html = new File(project.parent.projectDir, "/licenseChecker/individual-license-html").text
-
+        StringBuilder sb = new StringBuilder();
 
         configParser.jsonConfig.licenses.each { k ->
-            finalHtml += html.replace("{name}", k.name).replace("{author}", k.author).replace("{licenseText}", k.licenseText);
+            sb.append(html.replace("{name}", k.name).replace("{author}", k.author).replace("{licenseText}", k.licenseText));
         }
-        finalHtml += htmlBottom
+
         def assets = new File(project.projectDir, project.licenseChecker.outputFolder)
         if (!assets.exists()) {
-            // Create all folders up-to and including B
             assets.mkdirs()
         }
-        //File file = outputFile
-        outputFile.text = finalHtml
+
+        outputFile.text = finalHtml.replace("{attributions}", sb.toString())
     }
 
     Set<String> buildDependenciesMap() {

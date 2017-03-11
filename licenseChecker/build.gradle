@@ -43,7 +43,7 @@ if (project.hasProperty('BINTRAY_USER') && project.hasProperty('BINTRAY_API_KEY'
         pkg {
             repo = 'gradle-plugins'
             name = 'licenseChecker'
-            licenses = ['Apache-2.0']
+            licenses = ['MIT']
             vcsUrl = 'https://github.com/wbonnefond/LicenseChecker.git'
             version {
                 name = '0.1.0-Final'
