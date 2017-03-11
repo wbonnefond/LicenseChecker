@@ -4,7 +4,7 @@ LicenseChecker is a gradle plugin for Android that ensures all Open Source Libra
 LicenseChecker was created as a sanity check to prevent me from releasing an app with unattributed Open Source Libraries.  It is especially powerful for big teams where it is hard as an individual to manage all the dependencies.
 
 # Usage
-##### Input
+#### Input
 Provide a `license.json` file in your app's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
 
 ```json
@@ -38,7 +38,7 @@ Provide a `license.json` file in your app's directory.  This file is compared ag
 
 `licenses.json` must be kept in-sync with your app's libraries.
 
-##### Output
+#### Output
 By default the final HTML file will be output to `/{app}/src/main/assets/open_source_licenses.html`
 
 
