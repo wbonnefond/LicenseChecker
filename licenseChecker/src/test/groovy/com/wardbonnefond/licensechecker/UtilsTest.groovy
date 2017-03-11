@@ -78,7 +78,7 @@ class UtilsTest {
         def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
         def json = new JsonParser()
         json.parse(jsonConfigFile)
-        
+
         assertEquals(1, Utils.checkExcludedPackages(json, dependencies).size())
     }
 
