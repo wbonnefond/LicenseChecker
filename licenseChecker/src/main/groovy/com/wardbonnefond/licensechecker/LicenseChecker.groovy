@@ -20,7 +20,7 @@ class LicenseChecker implements Plugin<Project> {
 
         project.afterEvaluate {
             AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
-            checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/"+ project.licenseChecker.outputFileName)
+            checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
             println(checkerTask.outputFile.absolutePath)
             println(project.licenseChecker.inputFile)
             println(project.licenseChecker.outputFileName)
