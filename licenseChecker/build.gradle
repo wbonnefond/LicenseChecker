@@ -1,4 +1,9 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 dependencies {
     compile gradleApi()
@@ -13,5 +18,38 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.wardbonnefond'
+            artifactId 'licenseChecker'
+            version '0.1.0'
+        }
+    }
+}
+
 group = 'com.wardbonnefond'
 version = '0.1.0'
+
+// Set BINTRAY_USER and BINTRAY_API_KEY in your local.properties
+if (project.hasProperty('BINTRAY_USER') && project.hasProperty('BINTRAY_API_KEY')) {
+    bintray {
+        dryRun = true // Turn off when actually deploying
+        publish = false // Maybe someday turn this on for auto-publishing
+        publications = ['MyPublication']
+        user = "$BINTRAY_USER"
+        key = "$BINTRAY_API_KEY"
+        pkg {
+            repo = 'gradle-plugins'
+            name = 'licenseChecker'
+            licenses = ['Apache-2.0']
+            vcsUrl = 'https://github.com/wbonnefond/LicenseChecker.git'
+            version {
+                name = '0.1.0-Final'
+                desc = 'LicenseChecker 0.1.0'
+                vcsTag = '0.1.0'
+            }
+        }
+    }
+}
