@@ -36,10 +36,28 @@ Provide a `license.json` file in your app's directory.  This file is compared ag
 }
 ```
 
-`licenses.json` must be kept in-sync with your app's libraries.
+`licenses.json` should be kept in-sync with your app's libraries.  You'll still need to provide the attributions, LicenseChecker won't do this, it will just verify they exist and then provide a formatted output file.
+
+By default LicenseChecker won't fail builds for missing attributions. In order to take advantage of this functionality you can specify the following property on your variants.
+
+```gradle
+android {
+    buildTypes {
+        release {
+            ext.failOnMissingAttributions = true
+        }
+    }
+}
+```
+
 
 #### Output
 By default the final HTML file will be output to `/{app}/src/main/assets/open_source_licenses.html`
+
+
+# Known Limitations and Future Work
+
+* Currently won't work if the app has `productFlavors`, only `buildTypes`
 
 
 
