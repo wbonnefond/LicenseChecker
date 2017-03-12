@@ -29,7 +29,7 @@ android {
             ext.myFoo = true
         }
         debug {
-            ext.myFoo = true
+            ext.myFoo = false
 
         }
         something {

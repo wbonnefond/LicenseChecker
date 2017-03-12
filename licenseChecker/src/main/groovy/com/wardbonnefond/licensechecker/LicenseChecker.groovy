@@ -3,6 +3,10 @@ package com.wardbonnefond.licensechecker
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.invocation.Gradle
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class LicenseChecker implements Plugin<Project> {
     void apply(Project project) {
@@ -24,12 +28,19 @@ class LicenseChecker implements Plugin<Project> {
             checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
             checkerTask.inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
             def shouldFail = false
+
+            def assembleTask = getStartTask(project)
+            println(assembleTask)
+
             variants.all { variant ->
-                println("${variant.name.capitalize()}")
-                println(variant.getBuildType().myFoo)
-            }
-            if (project.hasProperty("myFoo")) {
-                shouldFail = project.myFoo
+                if (getVariantAssembleTask(variant).equals(assembleTask)) {
+                    println("${variant.name.capitalize()}")
+                    if (variant.getBuildType().hasProperty("myFoo")) {
+                        println(variant.getBuildType().myFoo)
+                        shouldFail = variant.getBuildType().myFoo
+                    }
+
+                }
             }
 
             checkerTask.failOnMissingAttributions = shouldFail
@@ -61,4 +72,23 @@ class LicenseChecker implements Plugin<Project> {
         }
 
     }
+
+
+    def getStartTask(project) {
+        def tasks = project.getGradle().getStartParameter().getTaskRequests().args.toString().replace("[","").replace("]", "").split(",")
+        def finalTask
+        tasks.each { task ->
+            println("task: " + task)
+            if (task.contains("assemble")) {
+                println("contains")
+                finalTask = task
+            }
+        }
+        return finalTask
+    }
+
+    def getVariantAssembleTask(variant) {
+        return variant.getAssemble().toString().replace("task", "").replace(" ", "").replace("\'", "")
+    }
+
 }
