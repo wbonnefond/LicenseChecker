@@ -2,11 +2,6 @@ package com.wardbonnefond.licensechecker
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
-import org.gradle.api.invocation.Gradle
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 class LicenseChecker implements Plugin<Project> {
     void apply(Project project) {
@@ -27,66 +22,41 @@ class LicenseChecker implements Plugin<Project> {
             AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
             checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
             checkerTask.inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
-            def shouldFail = false
 
             def assembleTask = getStartTask(project)
-            println(assembleTask)
+            //logger.info("Gradle task that started the build: " + assembleTask)
 
-            variants.all { variant ->
-                if (getVariantAssembleTask(variant).equals(assembleTask)) {
-                    println("${variant.name.capitalize()}")
-                    if (variant.getBuildType().hasProperty("myFoo")) {
-                        println(variant.getBuildType().myFoo)
-                        shouldFail = variant.getBuildType().myFoo
-                    }
+            // TODO: figure out a good way to handle something assemble{BuildType} with multiple flavors
+            def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
 
-                }
+            // Pull the extension from build.gradle if it was specified
+            if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
+                //logger.info("Found extension property failOnMissingAttributions for varaint: ${currentVariant.name.capitalize()}")
+                checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
             }
 
-            checkerTask.failOnMissingAttributions = shouldFail
-
-            println("failOnMissingAttributions: " + shouldFail)
-
-            Set<String> dependenciesMap = new HashSet();
-
-            project.configurations.each { conf ->
-                if (conf.name.equals("compile")) {
-                    conf.allDependencies.each { dep ->
-                        String packageName = dep.group + ":" + dep.name;
-                        if (!packageName.equals("null:unspecified")) {
-                            dependenciesMap.add(packageName)
-                        }
-                    }
-                }
-            }
-
-            checkerTask.dependenciesMapNew = dependenciesMap
-
-            println("Output File Name: " + project.licenseChecker.outputFileName)
-            println("Input File Name: " + project.licenseChecker.inputFileName)
-
-            println("Output File: " + checkerTask.outputFile.absolutePath)
-            println("Input File: " + checkerTask.inputFile.absolutePath)
+            //logger.info("Output File: " + checkerTask.outputFile.absolutePath)
+            //logger.info("Input File: " + checkerTask.inputFile.absolutePath)
 
             project.tasks.preBuild.dependsOn(checkerTask)
         }
-
     }
 
-
+    /**
+     * Determines the gradle 'assemble' task that started this build.
+     * @param project
+     * @return the task name that started the build if it contains 'assemble' otherwise an empty string
+     */
     def getStartTask(project) {
-        def tasks = project.getGradle().getStartParameter().getTaskRequests().args.toString().replace("[","").replace("]", "").split(",")
-        def finalTask
-        tasks.each { task ->
-            println("task: " + task)
-            if (task.contains("assemble")) {
-                println("contains")
-                finalTask = task
-            }
-        }
-        return finalTask
+        def tasks = project.getGradle().getStartParameter().getTaskRequests().args.toString().replace("[", "").replace("]", "").split(",")
+        return tasks.find { task -> task.contains("assemble") }
     }
 
+    /**
+     * Returns the 'assemble' task to build this variant as a string.
+     * @param variant
+     * @return the assemble task for the supplied variant
+     */
     def getVariantAssembleTask(variant) {
         return variant.getAssemble().toString().replace("task", "").replace(" ", "").replace("\'", "")
     }
