@@ -13,9 +13,6 @@ class AttributionGenerationTask extends DefaultTask {
     @InputFile
     def File inputFile
 
-    @Input
-    def Set<String> dependenciesMapNew
-
     @OutputFile
     def File outputFile
 
@@ -29,17 +26,15 @@ class AttributionGenerationTask extends DefaultTask {
             project.delete(outputFile)
         }
 
-        println("failOnMissingAttributions: " + failOnMissingAttributions)
-        println("Number of Dependencies: " + dependenciesMapNew.size())
+        logger.info("failOnMissingAttributions: " + failOnMissingAttributions)
 
         inputs.outOfDate { InputFileDetails change ->
-            println("$change.file.name has changed; regenerating attribution file")
+            logger.info("$change.file.name has changed; regenerating attribution file")
         }
 
         Set<String> dependenciesMap = buildDependenciesMap()
 
         def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
-        println(configFile.absolutePath)
         def configParser = new JsonParser()
         configParser.parse(configFile)
 

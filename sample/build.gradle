@@ -26,15 +26,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.myFoo = true
+            ext.failOnMissingAttributions = true
         }
         debug {
-            ext.myFoo = false
-
+            ext.failOnMissingAttributions = false
         }
         something {
-            ext.myFoo = false
-
+            debuggable true
         }
     }
 }
