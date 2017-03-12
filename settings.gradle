@@ -1,1 +1,1 @@
-include ':sample', ':licenseChecker'
+include ':sample', ':license-checker'

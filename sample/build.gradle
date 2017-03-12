@@ -1,9 +1,9 @@
 buildscript {
     repositories {
-        flatDir name: 'libs', dirs: "../licenseChecker/build/libs"
+        flatDir name: 'libs', dirs: "../license-checker/build/libs"
     }
     dependencies {
-        classpath 'com.wardbonnefond.licensechecker:licenseChecker:0.1.0'
+        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.0'
     }
 }
 
