@@ -4,33 +4,37 @@ import org.gradle.api.GradleException
 
 class Utils {
 
-    static def checkAttributions(parser, dependencies) {
+    static def checkAttributions(parser, dependencies, failOnMissingAttributions) {
         parser.jsonConfig.licenses.each { k ->
 
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
             }
             else {
-                throw new GradleException("Could not find " + k.gradlePackage + " in licenses.json")
+                if (failOnMissingAttributions) {
+                    throw new GradleException("Could not find " + k.gradlePackage + " in licenses.json")
+                }
             }
         }
         return dependencies
     }
 
-    def static checkExcludedPackages(parser, dependencies) {
+    def static checkExcludedPackages(parser, dependencies, failOnMissingAttributions) {
         parser.jsonConfig.excludedPackages.each { k ->
 
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
             }
             else {
-                throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses.json but not a project dependency")
+                if (failOnMissingAttributions) {
+                    throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses.json but not a project dependency")
+                }
             }
         }
         return dependencies
     }
 
-    def static ensureAllDependenciesAccountedFor(dependencies, logger) {
+    def static ensureAllDependenciesAccountedFor(dependencies, logger, failOnMissingAttributions) {
         if (dependencies.isEmpty()) {
             logger.info("All dependencies accounted for in licenses.json")
             return true;
@@ -42,7 +46,9 @@ class Utils {
                 logger.debug(dep + " was missing from the licenses.json")
                 count++;
             }
-            throw new GradleException(count + " packages missing from licenses.json")
+            if (failOnMissingAttributions) {
+                throw new GradleException(count + " packages missing from licenses.json")
+            }
         }
 
     }

@@ -38,7 +38,7 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(2, Utils.checkAttributions(json, dependencies).size())
+        assertEquals(2, Utils.checkAttributions(json, dependencies, true).size())
 
     }
 
@@ -54,7 +54,7 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        Utils.checkAttributions(json, dependencies)
+        Utils.checkAttributions(json, dependencies, true)
     }
 
     @Test
@@ -67,7 +67,7 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(0, Utils.checkExcludedPackages(json, dependencies).size())
+        assertEquals(0, Utils.checkExcludedPackages(json, dependencies, true).size())
     }
 
     @Test(expected = GradleException.class)
@@ -79,19 +79,19 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(1, Utils.checkExcludedPackages(json, dependencies).size())
+        assertEquals(1, Utils.checkExcludedPackages(json, dependencies, true).size())
     }
 
     @Test
     void testAllDependenciesAccountedFor() {
         Set<String> dependencies = new HashSet<>();
-        assertTrue(Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class)))
+        assertTrue(Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class), true))
     }
 
     @Test(expected = GradleException.class)
     void testAllDependenciesAccountedFor_NonEmptySet() {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.fake.fakelibrary")
-        Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class))
+        Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class), true)
     }
 }

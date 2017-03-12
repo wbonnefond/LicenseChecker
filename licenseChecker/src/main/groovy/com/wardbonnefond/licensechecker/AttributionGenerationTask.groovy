@@ -1,36 +1,56 @@
 package com.wardbonnefond.licensechecker
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
+import org.gradle.api.tasks.incremental.InputFileDetails
 
 class AttributionGenerationTask extends DefaultTask {
+
+    @InputFile
+    def File inputFile
+
+    @Input
+    def Set<String> dependenciesMapNew
 
     @OutputFile
     def File outputFile
 
+    @Input
+    def boolean failOnMissingAttributions
+
     @TaskAction
     def generateLicenseAttributions(IncrementalTaskInputs inputs) {
         if (!inputs.isIncremental() && outputFile.exists()) {
+            logger.debug("Licenses generation is not incremental; deleting output file")
             project.delete(outputFile)
+        }
+
+        println("failOnMissingAttributions: " + failOnMissingAttributions)
+        println("Number of Dependencies: " + dependenciesMapNew.size())
+
+        inputs.outOfDate { InputFileDetails change ->
+            println("$change.file.name has changed; regenerating attribution file")
         }
 
         Set<String> dependenciesMap = buildDependenciesMap()
 
-        def configFile = new File(project.projectDir, project.licenseChecker.inputFile);
+        def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
         println(configFile.absolutePath)
         def configParser = new JsonParser()
         configParser.parse(configFile)
 
         // Check the attributions
-        dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap)
+        dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap, failOnMissingAttributions)
 
         // Check the excluded packages
-        dependenciesMap = Utils.checkExcludedPackages(configParser, dependenciesMap)
+        dependenciesMap = Utils.checkExcludedPackages(configParser, dependenciesMap, failOnMissingAttributions)
 
         // Ensure no dependencies are still in the set
-        Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger)
+        Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger, failOnMissingAttributions)
 
         // build the HTML file
         String finalHtml = new File(project.parent.projectDir, "/licenseChecker/base-html").text
