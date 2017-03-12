@@ -12,5 +12,7 @@ class LicenseCheckerExtension {
 
     def outputFileName = "open_source_licenses.html"
 
-    def inputFile = 'licenses.json'
+    def inputFileName = 'licenses.json'
+
+    def failOnMissingAttributions = false
 }
