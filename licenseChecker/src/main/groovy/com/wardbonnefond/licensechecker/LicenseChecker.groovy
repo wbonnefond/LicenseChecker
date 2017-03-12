@@ -32,20 +32,13 @@ class LicenseChecker implements Plugin<Project> {
                 }
                 checkerTask.inputFile = inputFile
 
-                //def assembleTask = getStartTask(project)
-                //logger.info("Gradle task that started the build: " + assembleTask)
-
                 // TODO: figure out a good way to handle something assemble{BuildType} with multiple flavors
                 def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
 
                 // Pull the extension from build.gradle if it was specified
                 if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
-                    //logger.info("Found extension property failOnMissingAttributions for varaint: ${currentVariant.name.capitalize()}")
                     checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
                 }
-
-                //logger.info("Output File: " + checkerTask.outputFile.absolutePath)
-                //logger.info("Input File: " + checkerTask.inputFile.absolutePath)
 
                 project.tasks.preBuild.dependsOn(checkerTask)
             }
