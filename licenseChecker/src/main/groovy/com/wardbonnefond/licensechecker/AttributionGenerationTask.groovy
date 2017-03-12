@@ -1,6 +1,7 @@
 package com.wardbonnefond.licensechecker
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
@@ -25,6 +26,9 @@ class AttributionGenerationTask extends DefaultTask {
             logger.debug("Licenses generation is not incremental; deleting output file")
             project.delete(outputFile)
         }
+        if (!inputFile.exists()) {
+            throw new GradleException("licenses.json does not exist")
+        }
 
         logger.info("failOnMissingAttributions: " + failOnMissingAttributions)
 
@@ -35,6 +39,9 @@ class AttributionGenerationTask extends DefaultTask {
         Set<String> dependenciesMap = buildDependenciesMap()
 
         def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
+        if (!configFile.exists()) {
+            throw new GradleException("licenses.json does not exist")
+        }
         def configParser = new JsonParser()
         configParser.parse(configFile)
 
