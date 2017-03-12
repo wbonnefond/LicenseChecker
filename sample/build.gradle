@@ -29,16 +29,13 @@ android {
             ext.failOnMissingAttributions = true
         }
         debug {
-            ext.failOnMissingAttributions = false
+            ext.failOnMissingAttributions = true
         }
         something {
             debuggable true
         }
     }
 }
-
-
-
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

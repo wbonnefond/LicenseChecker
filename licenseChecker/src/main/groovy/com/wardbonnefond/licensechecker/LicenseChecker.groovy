@@ -1,5 +1,6 @@
 package com.wardbonnefond.licensechecker
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -19,26 +20,35 @@ class LicenseChecker implements Plugin<Project> {
         }
 
         project.afterEvaluate {
-            AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
-            checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
-            checkerTask.inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
-
             def assembleTask = getStartTask(project)
-            //logger.info("Gradle task that started the build: " + assembleTask)
+            // Only run the task if the current gradle task is 'assemble'
+            if (assembleTask != null) {
 
-            // TODO: figure out a good way to handle something assemble{BuildType} with multiple flavors
-            def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
+                AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
+                checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
+                def inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
+                if (!inputFile.exists()) {
+                    throw new GradleException("license.json config file does not exist at location: " + inputFile.absolutePath)
+                }
+                checkerTask.inputFile = inputFile
 
-            // Pull the extension from build.gradle if it was specified
-            if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
-                //logger.info("Found extension property failOnMissingAttributions for varaint: ${currentVariant.name.capitalize()}")
-                checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
+                //def assembleTask = getStartTask(project)
+                //logger.info("Gradle task that started the build: " + assembleTask)
+
+                // TODO: figure out a good way to handle something assemble{BuildType} with multiple flavors
+                def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
+
+                // Pull the extension from build.gradle if it was specified
+                if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
+                    //logger.info("Found extension property failOnMissingAttributions for varaint: ${currentVariant.name.capitalize()}")
+                    checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
+                }
+
+                //logger.info("Output File: " + checkerTask.outputFile.absolutePath)
+                //logger.info("Input File: " + checkerTask.inputFile.absolutePath)
+
+                project.tasks.preBuild.dependsOn(checkerTask)
             }
-
-            //logger.info("Output File: " + checkerTask.outputFile.absolutePath)
-            //logger.info("Input File: " + checkerTask.inputFile.absolutePath)
-
-            project.tasks.preBuild.dependsOn(checkerTask)
         }
     }
 
