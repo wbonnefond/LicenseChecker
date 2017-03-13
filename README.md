@@ -5,7 +5,7 @@ LicenseChecker was created as a sanity check to prevent me from releasing an app
 
 # Usage
 ## Input
-Provide a `licenses.json` file in your app's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
+Provide a `licenses.json` file in your app module's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
 
 ```json
 {
