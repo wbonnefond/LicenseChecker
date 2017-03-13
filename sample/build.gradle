@@ -1,14 +1,14 @@
 buildscript {
     repositories {
-        flatDir name: 'libs', dirs: "../license-checker/build/libs"
+        //flatDir name: 'libs', dirs: "../license-checker/build/libs"
     }
     dependencies {
-        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.0'
+        //classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.0'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.wardbonnefond.licensechecker'
+//apply plugin: 'com.wardbonnefond.licensechecker'
 
 android {
     compileSdkVersion 25

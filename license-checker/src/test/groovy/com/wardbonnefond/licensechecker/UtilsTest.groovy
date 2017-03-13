@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue
 
 class UtilsTest {
 
-    private final static RESOURCE_PATH = 'src/test/input/'
+    private final static RESOURCE_PATH = 'src/test/resources/'
 
     /**
      *  Can't figure out what is happening, but if tests run during project build
