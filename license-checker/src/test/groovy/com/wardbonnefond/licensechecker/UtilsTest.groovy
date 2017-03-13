@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-
 class UtilsTest {
 
     private final static RESOURCE_PATH = 'src/test/input/'
@@ -21,7 +20,7 @@ class UtilsTest {
     private File getJsonConfigFileForTests(fileName) {
         def jsonConfigFile = new File(RESOURCE_PATH, fileName)
         if (!jsonConfigFile.exists()) {
-            jsonConfigFile = new File('licenseChecker/' + RESOURCE_PATH, fileName)
+            jsonConfigFile = new File('license-checker/' + RESOURCE_PATH, fileName)
         }
         return jsonConfigFile
     }
@@ -93,5 +92,37 @@ class UtilsTest {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.fake.fakelibrary")
         Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class), true)
+    }
+
+    @Test
+    void testIsTaskBuildingMultipleVariants_assemble() {
+        def task = "assemble"
+        def buildTypes = ["release", "debug", "nightly"]
+        def productFlavors = ["paid", "free"]
+        assertEquals("assemble", Utils.isTaskBuildingMultipleVariants(task, buildTypes, productFlavors))
+    }
+
+    @Test
+    void testIsTaskBuildingMultipleVariants_assembleDebug() {
+        def task = "assembleDebug"
+        def buildTypes = ["release", "debug", "nightly"]
+        def productFlavors = ["paid", "free"]
+        assertEquals("debug", Utils.isTaskBuildingMultipleVariants(task, buildTypes, productFlavors))
+    }
+
+    @Test
+    void testIsTaskBuildingMultipleVariants_assembleFree() {
+        def task = "assembleFree"
+        def buildTypes = ["release", "debug", "nightly"]
+        def productFlavors = ["paid", "free"]
+        assertEquals("free", Utils.isTaskBuildingMultipleVariants(task, buildTypes, productFlavors))
+    }
+
+    @Test
+    void testIsTaskBuildingMultipleVariants_assembleFreeDebug() {
+        def task = "assembleFreeDebug"
+        def buildTypes = ["release", "debug", "nightly"]
+        def productFlavors = ["paid", "free"]
+        assertEquals("", Utils.isTaskBuildingMultipleVariants(task, buildTypes, productFlavors))
     }
 }

@@ -53,6 +53,31 @@ class Utils {
 
     }
 
+    def static isTaskBuildingMultipleVariants(task, buildTypes, productFlavors) {
+        def taskRemoved = task.toLowerCase().replace("assemble", "")
+        if (taskRemoved.isEmpty()) {
+            return task;
+        }
+        def foundBuildType = buildTypes.find { buildType ->
+            if (buildType.equals(taskRemoved)) {
+                return buildType
+            }
+        }
+        if (foundBuildType != null) {
+            return foundBuildType;
+        }
+        def foundProductFlavor = productFlavors.find { productFlavor ->
+            if (productFlavor.equals(taskRemoved)) {
+                return productFlavor
+            }
+        }
+        if (foundProductFlavor != null) {
+            return foundProductFlavor;
+        }
+        return "";
+
+    }
+
     def writeOutputFile(parser, directory, directoryParent) {
         // build the License file
 
