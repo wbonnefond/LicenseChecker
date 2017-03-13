@@ -5,7 +5,7 @@ LicenseChecker was created as a sanity check to prevent me from releasing an app
 
 # Usage
 ## Input
-Provide a `license.json` file in your app's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
+Provide a `licenses.json` file in your app's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
 
 ```json
 {
@@ -62,6 +62,11 @@ Here's a [sample] output for the above input file.
 
 [sample]: <http://htmlpreview.github.io/?https://github.com/wbonnefond/LicenseChecker/blob/master/sample_output.html>
 
+
+# Known Limitations and Future Work
+
+* Currently only supports libraries added with the `compile` keyword; for example libraries with `compilePaid` will not be picked up as a dependency
+* Doesn't support outputting file-per-variant
 
 # License
 ```
