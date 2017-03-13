@@ -51,7 +51,7 @@ android {
 }
 ```
 
-LicenseChecker supports assemble tasks that build multiple variants.  If any variant has set `ext.failOnMissingAttribution = true` and there are missing attributions, then the entire build will fail.
+LicenseChecker supports assemble tasks that build multiple variants.  If any variant has set `ext.failOnMissingAttributions = true` and there are missing attributions, then the entire build will fail.
 
 
 
