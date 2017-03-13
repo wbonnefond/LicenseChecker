@@ -33,13 +33,18 @@ group = 'com.wardbonnefond'
 version = '0.1.0'
 
 // Set BINTRAY_USER and BINTRAY_API_KEY in your local.properties
-if (project.hasProperty('BINTRAY_USER') && project.hasProperty('BINTRAY_API_KEY')) {
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def bintrayUser = properties.getProperty('BINTRAY_USER')
+def bintrayApiKey = properties.getProperty('BINTRAY_API_KEY')
+
+if (bintrayUser != null && bintrayApiKey != null) {
     bintray {
-        dryRun = true // Turn off when actually deploying
-        publish = false // Maybe someday turn this on for auto-publishing
+        dryRun = true
+        publish = false
         publications = ['MyPublication']
-        user = "$BINTRAY_USER"
-        key = "$BINTRAY_API_KEY"
+        user = bintrayUser
+        key = bintrayApiKey
         pkg {
             repo = 'gradle-plugins'
             name = 'license-checker'

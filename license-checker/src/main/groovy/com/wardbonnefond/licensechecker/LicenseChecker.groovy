@@ -16,12 +16,13 @@ class LicenseChecker implements Plugin<Project> {
             variants = project.android.libraryVariants
         }
         else {
-            throw new IllegalStateException('Android project must have applicationVariants or libraryVariants!')
+            throw new GradleException('Android project must have applicationVariants or libraryVariants!')
         }
 
         project.afterEvaluate {
             def assembleTask = getStartTask(project)
             // Only run the task if the current gradle task is 'assemble'
+            println("the task: " +assembleTask)
             if (assembleTask != null) {
 
                 AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
@@ -32,12 +33,37 @@ class LicenseChecker implements Plugin<Project> {
                 }
                 checkerTask.inputFile = inputFile
 
-                // TODO: figure out a good way to handle something assemble{BuildType} with multiple flavors
-                def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
+                def buildTypes = []
+                def productFlavors = []
 
-                // Pull the extension from build.gradle if it was specified
-                if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
-                    checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
+                // buildTypes
+                project.android.getBuildTypes().each { buildType ->
+                    buildTypes.add(buildType.name)
+                }
+                // productFlavor
+                project.android.getProductFlavors().each { productFlavor ->
+                    productFlavors.add(productFlavor.name)
+                }
+
+                def multiVariantString = Utils.isTaskBuildingMultipleVariants(assembleTask, buildTypes, productFlavors)
+                if (multiVariantString.isEmpty()) {
+                    def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
+                    // Pull the extension from build.gradle if it was specified
+                    if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
+                        checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
+                    }
+                }
+                else {
+                    def shouldFailOnMissingAttributions = false
+                    variants.each { variant ->
+                        if (getVariantAssembleTask(variant).toLowerCase().contains(multiVariantString)) {
+                            if (!shouldFailOnMissingAttributions && variant.getBuildType().hasProperty("failOnMissingAttributions")) {
+                                shouldFailOnMissingAttributions = variant.getBuildType().failOnMissingAttributions
+                            }
+                        }
+                    }
+                    checkerTask.failOnMissingAttributions = shouldFailOnMissingAttributions
+
                 }
 
                 project.tasks.preBuild.dependsOn(checkerTask)
