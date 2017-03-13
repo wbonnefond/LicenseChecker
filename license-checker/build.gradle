@@ -24,13 +24,13 @@ publishing {
             from components.java
             groupId 'com.wardbonnefond'
             artifactId 'license-checker'
-            version '0.1.0'
+            version '0.1.1'
         }
     }
 }
 
 group = 'com.wardbonnefond'
-version = '0.1.0'
+version = '0.1.1'
 
 // Set BINTRAY_USER and BINTRAY_API_KEY in your local.properties
 Properties properties = new Properties()
@@ -51,10 +51,29 @@ if (bintrayUser != null && bintrayApiKey != null) {
             licenses = ['MIT']
             vcsUrl = 'https://github.com/wbonnefond/LicenseChecker.git'
             version {
-                name = '0.1.0'
-                desc = 'LicenseChecker 0.1.0'
-                vcsTag = '0.1.0'
+                name = '0.1.1'
+                desc = 'LicenseChecker 0.1.1'
+                vcsTag = '0.1.1'
             }
         }
     }
 }
+
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+
