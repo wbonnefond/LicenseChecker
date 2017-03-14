@@ -55,9 +55,9 @@ class AttributionGenerationTask extends DefaultTask {
         Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger, failOnMissingAttributions)
 
         // build the HTML file
-        String finalHtml = new File(project.parent.projectDir, "/license-checker/src/main/resources/base-html").text
+        String finalHtml = Utils.BASE_HTML;
 
-        String html = new File(project.parent.projectDir, "/license-checker/src/main/resources/individual-license-html").text
+        String html = Utils.INDIVIDUAL_HTML;
         StringBuilder sb = new StringBuilder();
 
         configParser.jsonConfig.libraries.each { k ->

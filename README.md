@@ -13,7 +13,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.wardbonnefond:license-checker:0.1.1'
+        classpath 'com.wardbonnefond:license-checker:0.1.4'
     }
 }
 
@@ -32,12 +32,12 @@ Provide an `attributions.json` file in your app module's directory.  This file i
   "libraries": [
     {
       "name": "Fake Library",
-      "licenseText": "Text to display about the license",
+      "legalText": "Text to display about the license",
       "gradlePackage": "com.fake.fakest:myFakeLibrary"
     },
     {
       "name": "Jane's Awesome Library",
-      "licenseText": "Text to display about the license",
+      "legalText": "Text to display about the license",
       "gradlePackage": "com.jdoe:janes-awesome-library"
     }
   ],

@@ -1,10 +1,11 @@
 buildscript {
     repositories {
         //jcenter()
-        flatDir name: 'libs', dirs: "../license-checker/build/libs"
+        //flatDir name: 'libs', dirs: "../license-checker/build/libs"
+        maven { url "https://dl.bintray.com/wbonnefond/gradle-plugins/" }
     }
     dependencies {
-        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.1'
+        classpath 'com.wardbonnefond:license-checker:0.1.4'
     }
 }
 
