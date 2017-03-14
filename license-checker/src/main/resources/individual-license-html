@@ -1,6 +1,5 @@
 <b>{name}</b>
 <br/>
-{author}
 <pre>
-{licenseText}
+{legalText}
 </pre>

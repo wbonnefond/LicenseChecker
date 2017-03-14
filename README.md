@@ -25,27 +25,23 @@ apply plugin: 'com.wardbonnefond.licensechecker'
 
 # Usage
 ## Input
-Provide a `licenses.json` file in your app module's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedPackages` section is for libraries that don't need attribution (your own library, closed source, etc.).
+Provide an `attributions.json` file in your app module's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedLibraries` section is for libraries that don't need attribution (your own library, closed source, etc.).
 
 ```json
 {
-  "licenses": [
+  "libraries": [
     {
       "name": "Fake Library",
-      "author": "John Doe",
-      "license": "License",
       "licenseText": "Text to display about the license",
       "gradlePackage": "com.fake.fakest:myFakeLibrary"
     },
     {
       "name": "Jane's Awesome Library",
-      "author": "Jane Doe",
-      "license": "License",
       "licenseText": "Text to display about the license",
       "gradlePackage": "com.jdoe:janes-awesome-library"
     }
   ],
-  "excludedPackages": [
+  "excludedLibraries": [
     {
       "gradlePackage": "com.android.support:appcompat-v7"
     },
@@ -56,7 +52,7 @@ Provide a `licenses.json` file in your app module's directory.  This file is com
 }
 ```
 
-`licenses.json` should be kept in-sync with your app's libraries.  You'll still need to provide the attributions, LicenseChecker won't do this, it will just verify they exist and then provide a formatted output file.
+`attributions.json` should be kept in-sync with your app's libraries.  You'll still need to provide the attributions, LicenseChecker won't do this, it will just verify they exist and then provide a formatted output file.
 
 By default LicenseChecker won't fail builds for missing attributions. In order to take advantage of this functionality you can specify the following property on your variants.
 
@@ -85,7 +81,7 @@ Here's a [sample] output for the above input file.
 
 # Known Limitations and Future Work
 
-* Currently only supports libraries added with the `compile` keyword; for example libraries with `compilePaid` will not be picked up as a dependency
+* Currently only supports libraries added with the `compile` keyword; for example libraries with `paidCompile` will not be picked up as a dependency
 * Doesn't support outputting file-per-variant
 * Doesn't currently support libraries added from folders (ie. `/libs`)
 
