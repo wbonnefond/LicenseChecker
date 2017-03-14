@@ -45,6 +45,9 @@ class AttributionGenerationTask extends DefaultTask {
         def configParser = new JsonParser()
         configParser.parse(configFile)
 
+        // First do some validation on the input
+        Utils.jsonContainsDuplicates(configParser)
+
         // Check the attributions
         dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap, failOnMissingAttributions)
 

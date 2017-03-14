@@ -4,6 +4,35 @@ import org.gradle.api.GradleException
 
 class Utils {
 
+    static def jsonContainsDuplicates(parser) {
+        Set<String> packagesInJsonFile = new HashSet<>();
+        parser.jsonConfig.libraries.each { k ->
+
+            if (packagesInJsonFile.contains(k.gradlePackage)) {
+                throw new GradleException(k.gradlePackage + " declared more than once in attributions.json")
+            }
+            else {
+                packagesInJsonFile.add(k.gradlePackage)
+            }
+        }
+        Set<String> excludedPackagesInJsonFile = new HashSet<>();
+        parser.jsonConfig.excludedLibraries.each { k ->
+
+            if (excludedPackagesInJsonFile.contains(k.gradlePackage)) {
+                throw new GradleException(k.gradlePackage + " declared more than once in attributions.json")
+            }
+            else {
+                excludedPackagesInJsonFile.add(k.gradlePackage)
+            }
+        }
+        packagesInJsonFile.each { gradlePackage ->
+            if (excludedPackagesInJsonFile.contains(gradlePackage)) {
+                throw new GradleException(gradlePackage + " declared more than once in attributions.json")
+            }
+        }
+        return false
+    }
+
     static def checkAttributions(parser, dependencies, failOnMissingAttributions) {
         parser.jsonConfig.libraries.each { k ->
 
@@ -27,7 +56,7 @@ class Utils {
             }
             else {
                 if (failOnMissingAttributions) {
-                    throw new GradleException("Excluded package: " + k.gradlePackage + " in licenses.json but not a project dependency")
+                    throw new GradleException("Excluded package: " + k.gradlePackage + " in attributions.json but not a project dependency")
                 }
             }
         }
@@ -36,18 +65,24 @@ class Utils {
 
     def static ensureAllDependenciesAccountedFor(dependencies, logger, failOnMissingAttributions) {
         if (dependencies.isEmpty()) {
-            logger.info("All dependencies accounted for in licenses.json")
+            logger.info("All dependencies accounted for in attributions.json")
             return true;
 
         }
         else {
             def count = 0
             dependencies.each { dep ->
-                logger.debug(dep + " was missing from the licenses.json")
+                def text = dep + " was missing from the attributions.json"
+                if (failOnMissingAttributions) {
+                    logger.error(text)
+                }
+                else {
+                    logger.debug(text)
+                }
                 count++;
             }
             if (failOnMissingAttributions) {
-                throw new GradleException(count + " packages missing from licenses.json")
+                throw new GradleException(count + " packages missing from attributions.json")
             }
         }
 
@@ -76,27 +111,6 @@ class Utils {
         }
         return "";
 
-    }
-
-    def writeOutputFile(parser, directory, directoryParent) {
-        // build the License file
-
-        String finalHtml = new File(directoryParent, "/buildSrc/html-top").text
-        String htmlBottom = new File(directoryParent, "/buildSrc/html-bottom").text
-
-        String html = new File(directoryParent, "/buildSrc/individual-license-html").text
-
-        parser.jsonConfig.licenses.each { k ->
-            finalHtml += html.replace("{name}", k.name).replace("{author}", k.author).replace("{licenseText}", k.licenseText);
-        }
-        finalHtml += htmlBottom
-        def assets = new File(directory, "/src/main/assets")
-        if (!assets.exists()) {
-            // Create all folders up-to and including B
-            assets.mkdirs()
-        }
-        File file = new File(directory, "/src/main/assets/open_source_licenses.html")
-        file.text = finalHtml
     }
 
     def static BASE_HTML = "<html>\n" +

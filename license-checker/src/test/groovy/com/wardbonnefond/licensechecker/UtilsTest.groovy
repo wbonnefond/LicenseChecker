@@ -1,20 +1,23 @@
 package com.wardbonnefond.licensechecker
 
 import org.gradle.api.GradleException
+import org.junit.Before
 import org.junit.Test
-import org.slf4j.LoggerFactory
+import org.mockito.Mockito
+import org.slf4j.Logger
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class UtilsTest {
 
     private final static RESOURCE_PATH = 'src/test/resources/'
 
+    private Logger logger;
+
     /**
      *  Can't figure out what is happening, but if tests run during project build
-     *  it has /licenseChecker in the relative path, if you run the tests manually
-     *  from AS it doesn't. This will add the folder to the path if needed
+     *  it has /license-checker in the relative path, if you run the tests manually
+     *  from Studio it doesn't. This method will add the folder to the path if needed
      * @return
      */
     private File getJsonConfigFileForTests(fileName) {
@@ -23,6 +26,12 @@ class UtilsTest {
             jsonConfigFile = new File('license-checker/' + RESOURCE_PATH, fileName)
         }
         return jsonConfigFile
+    }
+
+    @Before
+    public void setup() {
+        logger = Mockito.mock(Logger.class)
+
     }
 
     @Test
@@ -43,7 +52,7 @@ class UtilsTest {
 
 
     @Test(expected = GradleException.class)
-    void testThrowsExceptionWhenPackageDoesntExist() {
+    void testThrowsExceptionWhenPackageDoesntExist_FailOnMissing() {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.github.bumptech.glide:glide")
         dependencies.add("com.android.support:appcompat-v7")
@@ -84,14 +93,15 @@ class UtilsTest {
     @Test
     void testAllDependenciesAccountedFor() {
         Set<String> dependencies = new HashSet<>();
-        assertTrue(Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class), true))
+        assertTrue(Utils.ensureAllDependenciesAccountedFor(dependencies, logger, true))
+        Mockito.verify(logger, Mockito.times(1)).info("All dependencies accounted for in attributions.json")
     }
 
     @Test(expected = GradleException.class)
     void testAllDependenciesAccountedFor_NonEmptySet() {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.fake.fakelibrary")
-        Utils.ensureAllDependenciesAccountedFor(dependencies, LoggerFactory.getLogger(UtilsTest.class), true)
+        Utils.ensureAllDependenciesAccountedFor(dependencies, logger, true)
     }
 
     @Test
@@ -124,5 +134,37 @@ class UtilsTest {
         def buildTypes = ["release", "debug", "nightly"]
         def productFlavors = ["paid", "free"]
         assertEquals("", Utils.isTaskBuildingMultipleVariants(task, buildTypes, productFlavors))
+    }
+
+    @Test(expected = GradleException.class)
+    void testJsonContainsDuplicates_DuplicatePackages() {
+        def jsonConfigFile = getJsonConfigFileForTests('duplicate-libs.json')
+        def json = new JsonParser()
+        json.parse(jsonConfigFile)
+        Utils.jsonContainsDuplicates(json)
+    }
+
+    @Test
+    void testJsonContainsDuplicates_NoDuplicates() {
+        def jsonConfigFile = getJsonConfigFileForTests('license-1.json')
+        def json = new JsonParser()
+        json.parse(jsonConfigFile)
+        assertFalse(Utils.jsonContainsDuplicates(json))
+    }
+
+    @Test(expected = GradleException.class)
+    void testJsonContainsDuplicates_DuplicateExcludedPackages() {
+        def jsonConfigFile = getJsonConfigFileForTests('duplicate-excluded-libs.json')
+        def json = new JsonParser()
+        json.parse(jsonConfigFile)
+        Utils.jsonContainsDuplicates(json)
+    }
+
+    @Test(expected = GradleException.class)
+    void testJsonContainsDuplicates_PackageIncludedAndExcluded() {
+        def jsonConfigFile = getJsonConfigFileForTests('lib-in-both.json')
+        def json = new JsonParser()
+        json.parse(jsonConfigFile)
+        Utils.jsonContainsDuplicates(json)
     }
 }
