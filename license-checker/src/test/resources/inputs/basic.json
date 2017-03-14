@@ -1,0 +1,19 @@
+{
+  "libraries": [
+    {
+      "name": "Fake Library",
+      "legalText": "Legal text",
+      "gradlePackage": "com.fake.library:fakelibrary"
+    },
+    {
+      "name": "Some Library",
+      "legalText": "More text",
+      "gradlePackage": "com.new:some-library"
+    }
+  ],
+  "excludedLibraries": [
+    {
+      "gradlePackage": "com.android.support:appcompat-v7"
+    }
+  ]
+}

@@ -12,6 +12,15 @@
     </style>
 </head>
 <body>
-{attributions}
+<b>Fake Library</b>
+<br/>
+<pre>
+Legal text
+</pre>
+<b>Some Library</b>
+<br/>
+<pre>
+More text
+</pre>
 </body>
 </html>

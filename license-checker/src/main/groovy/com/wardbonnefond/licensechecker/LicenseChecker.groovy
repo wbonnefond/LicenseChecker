@@ -22,14 +22,14 @@ class LicenseChecker implements Plugin<Project> {
         project.afterEvaluate {
             def assembleTask = getStartTask(project)
             // Only run the task if the current gradle task is 'assemble'
-            println("the task: " +assembleTask)
             if (assembleTask != null) {
 
                 AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
                 checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
+                checkerTask.inputFileName = project.licenseChecker.inputFileName
                 def inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
                 if (!inputFile.exists()) {
-                    throw new GradleException("license.json config file does not exist at location: " + inputFile.absolutePath)
+                    throw new GradleException(project.licenseChecker.inputFileName + " config file does not exist at location: " + inputFile.absolutePath)
                 }
                 checkerTask.inputFile = inputFile
 
