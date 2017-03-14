@@ -18,6 +18,21 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -25,6 +40,8 @@ publishing {
             groupId 'com.wardbonnefond'
             artifactId 'license-checker'
             version '0.1.1'
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
 }
@@ -61,19 +78,6 @@ if (bintrayUser != null && bintrayApiKey != null) {
 
 
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
 
 
