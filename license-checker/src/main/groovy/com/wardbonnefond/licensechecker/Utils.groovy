@@ -4,6 +4,12 @@ import org.gradle.api.GradleException
 
 class Utils {
 
+    /**
+     * Determines if the input file contains any duplicate package names. Helps protect against copy-paste errors when first setting up the
+     * attributions.json file
+     * @param parser the parser for the input file
+     * @return false if it contains no duplicates, throws and exception if it does
+     */
     static def jsonContainsDuplicates(parser) {
         Set<String> packagesInJsonFile = new HashSet<>();
         parser.jsonConfig.libraries.each { k ->
@@ -33,6 +39,13 @@ class Utils {
         return false
     }
 
+    /**
+     * Checks that each dependency for the app is listed in the input json file.
+     * @param parser the parser for the input file
+     * @param dependencies a Set<String> of the package names for the apps dependencies
+     * @param failOnMissingAttributions whether this check should throw an exception if there are missing attributions in the input file
+     * @return
+     */
     static def checkAttributions(parser, dependencies, failOnMissingAttributions) {
         parser.jsonConfig.libraries.each { k ->
 
@@ -41,13 +54,20 @@ class Utils {
             }
             else {
                 if (failOnMissingAttributions) {
-                    throw new GradleException("Could not find " + k.gradlePackage + " in licenses.json")
+                    throw new GradleException("Could not find " + k.gradlePackage + " in attributions.json")
                 }
             }
         }
         return dependencies
     }
 
+    /**
+     * Checks that each excluded package in the input file is a project dependency
+     * @param parser the parse for the input file
+     * @param dependencies a Set<String> of the package names for the apps dependencies
+     * @param failOnMissingAttributions whether this check should throw an exception if there are attributions in the input file
+     * @return
+     */
     def static checkExcludedPackages(parser, dependencies, failOnMissingAttributions) {
         parser.jsonConfig.excludedLibraries.each { k ->
 
@@ -113,6 +133,17 @@ class Utils {
 
     }
 
+    def static buildHtmlOutput(parser) {
+        String html = INDIVIDUAL_HTML;
+        StringBuilder sb = new StringBuilder();
+
+        parser.jsonConfig.libraries.each { k ->
+            sb.append(html.replace("{name}", k.name).replace("{legalText}", k.legalText));
+        }
+
+        return BASE_HTML.replace("{attributions}", sb.toString())
+    }
+
     def static BASE_HTML = "<html>\n" +
             "<head>\n" +
             "    <style>\n" +
@@ -127,7 +158,7 @@ class Utils {
             "    </style>\n" +
             "</head>\n" +
             "<body>\n" +
-            "{attributions}\n" +
+            "{attributions}" +
             "</body>\n" +
             "</html>";
 
@@ -135,5 +166,5 @@ class Utils {
             "<br/>\n" +
             "<pre>\n" +
             "{legalText}\n" +
-            "</pre>";
+            "</pre>\n";
 }

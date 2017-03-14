@@ -10,7 +10,9 @@ import static org.junit.Assert.*
 
 class UtilsTest {
 
-    private final static RESOURCE_PATH = 'src/test/resources/'
+    private final static INPUT_PATH = 'src/test/resources/inputs/'
+    private final static OUTPUT_PATH = 'src/test/resources/outputs/'
+
 
     private Logger logger;
 
@@ -21,11 +23,19 @@ class UtilsTest {
      * @return
      */
     private File getJsonConfigFileForTests(fileName) {
-        def jsonConfigFile = new File(RESOURCE_PATH, fileName)
+        def jsonConfigFile = new File(INPUT_PATH, fileName)
         if (!jsonConfigFile.exists()) {
-            jsonConfigFile = new File('license-checker/' + RESOURCE_PATH, fileName)
+            jsonConfigFile = new File('license-checker/' + INPUT_PATH, fileName)
         }
         return jsonConfigFile
+    }
+
+    private String getOutputTextForTest(fileName) {
+        def outputFile = new File(OUTPUT_PATH, fileName)
+        if (!outputFile.exists()) {
+            outputFile = new File('license-checker/' + OUTPUT_PATH, fileName)
+        }
+        return outputFile.text
     }
 
     @Before
@@ -166,5 +176,13 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
         Utils.jsonContainsDuplicates(json)
+    }
+
+    @Test
+    void testHtmlOutput_license1() {
+        def jsonConfigFile = getJsonConfigFileForTests('basic.json')
+        def json = new JsonParser()
+        json.parse(jsonConfigFile)
+        assertEquals(getOutputTextForTest('basic-output.txt'), Utils.buildHtmlOutput(json))
     }
 }

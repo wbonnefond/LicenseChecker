@@ -20,6 +20,8 @@ class AttributionGenerationTask extends DefaultTask {
     @Input
     def boolean failOnMissingAttributions
 
+    def String inputFileName
+
     @TaskAction
     def generateLicenseAttributions(IncrementalTaskInputs inputs) {
         if (!inputs.isIncremental() && outputFile.exists()) {
@@ -27,10 +29,10 @@ class AttributionGenerationTask extends DefaultTask {
             project.delete(outputFile)
         }
         if (!inputFile.exists()) {
-            throw new GradleException("attributions.json does not exist")
+            throw new GradleException(inputFileName + " does not exist")
         }
 
-        logger.info("failOnMissingAttributions: " + failOnMissingAttributions)
+        logger.info("Current variant has set failOnMissingAttributions=" + failOnMissingAttributions)
 
         inputs.outOfDate { InputFileDetails change ->
             logger.info("$change.file.name has changed; regenerating attribution file")
@@ -40,7 +42,7 @@ class AttributionGenerationTask extends DefaultTask {
 
         def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
         if (!configFile.exists()) {
-            throw new GradleException("attributions.json does not exist")
+            throw new GradleException(inputFileName + " does not exist")
         }
         def configParser = new JsonParser()
         configParser.parse(configFile)
@@ -57,24 +59,19 @@ class AttributionGenerationTask extends DefaultTask {
         // Ensure no dependencies are still in the set
         Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger, failOnMissingAttributions)
 
-        // build the HTML file
-        String finalHtml = Utils.BASE_HTML;
-
-        String html = Utils.INDIVIDUAL_HTML;
-        StringBuilder sb = new StringBuilder();
-
-        configParser.jsonConfig.libraries.each { k ->
-            sb.append(html.replace("{name}", k.name).replace("{legalText}", k.legalText));
-        }
-
+        // Create the ouput directory if it doesn't exist
         def assets = new File(project.projectDir, project.licenseChecker.outputFolder)
         if (!assets.exists()) {
             assets.mkdirs()
         }
 
-        outputFile.text = finalHtml.replace("{attributions}", sb.toString())
+        outputFile.text = Utils.buildHtmlOutput(configParser)
     }
 
+    /**
+     * Get's the list of dependencies defined in the app's build.gradle file.
+     * @return a Set<String> containing the package for every app dependency
+     */
     Set<String> buildDependenciesMap() {
         Set<String> dependenciesMap = new HashSet();
 
