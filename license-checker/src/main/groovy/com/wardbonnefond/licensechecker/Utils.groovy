@@ -5,7 +5,7 @@ import org.gradle.api.GradleException
 class Utils {
 
     static def checkAttributions(parser, dependencies, failOnMissingAttributions) {
-        parser.jsonConfig.licenses.each { k ->
+        parser.jsonConfig.libraries.each { k ->
 
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
@@ -20,7 +20,7 @@ class Utils {
     }
 
     def static checkExcludedPackages(parser, dependencies, failOnMissingAttributions) {
-        parser.jsonConfig.excludedPackages.each { k ->
+        parser.jsonConfig.excludedLibraries.each { k ->
 
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)

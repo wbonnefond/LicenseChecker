@@ -27,7 +27,7 @@ class AttributionGenerationTask extends DefaultTask {
             project.delete(outputFile)
         }
         if (!inputFile.exists()) {
-            throw new GradleException("licenses.json does not exist")
+            throw new GradleException("attributions.json does not exist")
         }
 
         logger.info("failOnMissingAttributions: " + failOnMissingAttributions)
@@ -40,7 +40,7 @@ class AttributionGenerationTask extends DefaultTask {
 
         def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
         if (!configFile.exists()) {
-            throw new GradleException("licenses.json does not exist")
+            throw new GradleException("attributions.json does not exist")
         }
         def configParser = new JsonParser()
         configParser.parse(configFile)
@@ -60,8 +60,8 @@ class AttributionGenerationTask extends DefaultTask {
         String html = new File(project.parent.projectDir, "/license-checker/src/main/resources/individual-license-html").text
         StringBuilder sb = new StringBuilder();
 
-        configParser.jsonConfig.licenses.each { k ->
-            sb.append(html.replace("{name}", k.name).replace("{author}", k.author).replace("{licenseText}", k.licenseText));
+        configParser.jsonConfig.libraries.each { k ->
+            sb.append(html.replace("{name}", k.name).replace("{legalText}", k.legalText));
         }
 
         def assets = new File(project.projectDir, project.licenseChecker.outputFolder)

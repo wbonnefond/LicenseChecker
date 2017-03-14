@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayLicensesAlertDialog() {
         WebView view = (WebView)LayoutInflater.from(this).inflate(R.layout.license_dialog, null);
-        view.loadUrl("file:///android_asset/licenses.html");
+        view.loadUrl("file:///android_asset/open_source_licenses.html");
         new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert).setTitle(getString(R.string.app_name))
                                                                                  .setView(view)
                                                                                  .setPositiveButton(android.R.string.ok, null)
