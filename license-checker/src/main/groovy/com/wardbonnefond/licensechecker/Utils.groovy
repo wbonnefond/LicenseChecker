@@ -98,4 +98,28 @@ class Utils {
         File file = new File(directory, "/src/main/assets/open_source_licenses.html")
         file.text = finalHtml
     }
+
+    def static BASE_HTML = "<html>\n" +
+            "<head>\n" +
+            "    <style>\n" +
+            "        body {\n" +
+            "        font-family: sans-serif;\n" +
+            "        }\n" +
+            "        pre {\n" +
+            "        background-color: #eeeeee;\n" +
+            "        padding: 1em;\n" +
+            "        white-space: pre-wrap;\n" +
+            "        }\n" +
+            "    </style>\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "{attributions}\n" +
+            "</body>\n" +
+            "</html>";
+
+    def static INDIVIDUAL_HTML = "<b>{name}</b>\n" +
+            "<br/>\n" +
+            "<pre>\n" +
+            "{legalText}\n" +
+            "</pre>";
 }
