@@ -80,6 +80,10 @@ class AttributionGenerationTask extends DefaultTask {
                 conf.allDependencies.each { dep ->
                     String packageName = dep.group + ":" + dep.name;
                     if (!packageName.equals("null:unspecified")) {
+                        if (packageName.startsWith("null:")) {
+                            // If the lib was included from /libs folder
+                            packageName = packageName.replace("null:", "")
+                        }
                         dependenciesMap.add(packageName)
                     }
                 }
