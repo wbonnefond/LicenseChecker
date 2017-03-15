@@ -1,16 +1,22 @@
 buildscript {
     repositories {
         //jcenter()
-        //flatDir name: 'libs', dirs: "../license-checker/build/libs"
-        maven { url "https://dl.bintray.com/wbonnefond/gradle-plugins/" }
+        flatDir name: 'libs', dirs: "../license-checker/build/libs"
+        //maven { url "https://dl.bintray.com/wbonnefond/gradle-plugins/" }
     }
     dependencies {
-        classpath 'com.wardbonnefond:license-checker:0.1.4'
+        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.4'
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.wardbonnefond.licensechecker'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
 
 android {
     compileSdkVersion 25
@@ -53,10 +59,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.android.support:support-v4:25.1.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
