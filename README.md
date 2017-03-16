@@ -52,7 +52,22 @@ Provide an `attributions.json` file in your app module's directory.  This file i
 }
 ```
 
+LicenseChecker supports `.jar` and `.aar` libraries added from you `/libs` folder. For instance, to include a library called `my-awesome-library.aar` in your `attributions.json` just remove the `.aar` extension:
+
+```json
+{
+  "libraries": [
+    {
+      "name": "My Awesome Library",
+      "legalText": "Text to display about the license",
+      "gradlePackage": "my-awesome-library"
+    }
+  ]
+}
+```
+
 `attributions.json` should be kept in-sync with your app's libraries.  You'll still need to provide the attributions, LicenseChecker won't do this, it will just verify they exist and then provide a formatted output file.
+
 
 By default LicenseChecker won't fail builds for missing attributions. In order to take advantage of this functionality you can specify the following property on your variants.
 
@@ -83,7 +98,6 @@ Here's a [sample] output for the above input file.
 
 * Currently only supports libraries added with the `compile` keyword; for example libraries with `paidCompile` will not be picked up as a dependency
 * Doesn't support outputting file-per-variant
-* Doesn't currently support libraries added from folders (ie. `/libs`)
 
 # License
 ```
