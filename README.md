@@ -13,7 +13,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.wardbonnefond:license-checker:0.1.4'
+        classpath 'com.wardbonnefond:license-checker:0.1.5'
     }
 }
 
