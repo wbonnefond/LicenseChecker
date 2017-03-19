@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LicenseChecker</string>
+    <string name="show_licenses">Show Licenses</string>
 </resources>

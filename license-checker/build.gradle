@@ -10,7 +10,7 @@ dependencies {
     compile localGroovy()
 }
 
-def pluginVersion = '0.1.4'
+def pluginVersion = '0.1.5'
 
 repositories {
     mavenCentral()
