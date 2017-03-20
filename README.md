@@ -89,10 +89,12 @@ LicenseChecker supports assemble tasks that build multiple variants.  If any var
 ## Output
 By default the final HTML file will be output to `/{app}/src/main/assets/open_source_licenses.html`
 
-Here's a [sample] output for the above input file.
+Here's a [sample] output HTML file.  And here's a screenshot of what it looks like in the app.
 
 [sample]: <http://htmlpreview.github.io/?https://github.com/wbonnefond/LicenseChecker/blob/master/sample_output.html>
 
+
+![screenshot](https://raw.githubusercontent.com/wbonnefond/LicenseChecker/master/sample_output.png)
 
 # Known Limitations and Future Work
 
