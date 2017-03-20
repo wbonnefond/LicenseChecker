@@ -25,7 +25,9 @@ apply plugin: 'com.wardbonnefond.licensechecker'
 
 # Usage
 ## Input
-Provide an `attributions.json` file in your app module's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedLibraries` section is for libraries that don't need attribution (your own library, closed source, etc.).
+Provide an `attributions.json` file in your app module's directory.  This file is compared against all libraries (with the `compile` prefix) in your app's `build.gradle` file. The final HTML output is generated using the data in this file. Any library in the `licenses` section will be added to the final HTML output. The `excludedLibraries` section is for libraries that don't need attribution (your own library, closed source, etc.). 
+
+I use this tool for escaping strings in JSON: http://bernhardhaeussner.de/odd/json-escape/ 
 
 ```json
 {
