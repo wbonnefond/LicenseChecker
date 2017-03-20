@@ -93,8 +93,7 @@ Here's a [sample] output HTML file.  And here's a screenshot of what it looks li
 
 [sample]: <http://htmlpreview.github.io/?https://github.com/wbonnefond/LicenseChecker/blob/master/sample_output.html>
 
-
-![screenshot](https://raw.githubusercontent.com/wbonnefond/LicenseChecker/master/sample_output.png)
+<img src="https://raw.githubusercontent.com/wbonnefond/LicenseChecker/master/sample_output.png" width="250">
 
 # Known Limitations and Future Work
 
