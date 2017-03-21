@@ -8,86 +8,71 @@ class LicenseChecker implements Plugin<Project> {
     void apply(Project project) {
         project.extensions.create('licenseChecker', LicenseCheckerExtension)
 
-        def variants = null
-        if (project.android.hasProperty('applicationVariants')) {
-            variants = project.android.applicationVariants
-        }
-        else if (project.android.hasProperty('libraryVariants')) {
-            variants = project.android.libraryVariants
-        }
-        else {
-            throw new GradleException('Android project must have applicationVariants or libraryVariants!')
-        }
-
         project.afterEvaluate {
-            def assembleTask = getStartTask(project)
-            // Only run the task if the current gradle task is 'assemble'
-            if (assembleTask != null) {
 
-                AttributionGenerationTask checkerTask = project.task("generateLicenseAttributions", type: AttributionGenerationTask)
-                checkerTask.outputFile = new File(project.projectDir, project.licenseChecker.outputFolder + "/" + project.licenseChecker.outputFileName)
-                checkerTask.inputFileName = project.licenseChecker.inputFileName
-                def inputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
-                if (!inputFile.exists()) {
-                    throw new GradleException(project.licenseChecker.inputFileName + " config file does not exist at location: " + inputFile.absolutePath)
-                }
-                checkerTask.inputFile = inputFile
+            def variants = null
+            if (project.android.hasProperty('applicationVariants')) {
+                variants = project.android.applicationVariants
+            }
+            else if (project.android.hasProperty('libraryVariants')) {
+                variants = project.android.libraryVariants
+            }
+            else {
+                throw new GradleException('Android project must have applicationVariants or libraryVariants!')
+            }
 
-                def buildTypes = []
-                def productFlavors = []
+            variants.all { variant ->
 
-                // buildTypes
-                project.android.getBuildTypes().each { buildType ->
-                    buildTypes.add(buildType.name)
-                }
-                // productFlavor
-                project.android.getProductFlavors().each { productFlavor ->
-                    productFlavors.add(productFlavor.name)
-                }
+                File variantOutputFile = new File("$project.buildDir/intermediates/assets/$flavorName/$buildType.name/" + project.licenseChecker.outputFileName)
+                File variantInputFile = new File(project.projectDir, project.licenseChecker.inputFileName)
+                def variantInputFileName = project.licenseChecker.inputFileName
+                def variantFlavor = variant.flavorName
+                def variantBuildType = variant.buildType.name
 
-                def multiVariantString = Utils.isTaskBuildingMultipleVariants(assembleTask, buildTypes, productFlavors)
-                if (multiVariantString.isEmpty()) {
-                    def currentVariant = variants.find { variant -> getVariantAssembleTask(variant).equals(assembleTask) }
-                    // Pull the extension from build.gradle if it was specified
-                    if (currentVariant != null && currentVariant.getBuildType().hasProperty("failOnMissingAttributions")) {
-                        checkerTask.failOnMissingAttributions = currentVariant.getBuildType().failOnMissingAttributions
-                    }
-                }
-                else {
-                    def shouldFailOnMissingAttributions = false
-                    variants.each { variant ->
-                        if (getVariantAssembleTask(variant).toLowerCase().contains(multiVariantString)) {
-                            if (!shouldFailOnMissingAttributions && variant.getBuildType().hasProperty("failOnMissingAttributions")) {
-                                shouldFailOnMissingAttributions = variant.getBuildType().failOnMissingAttributions
-                            }
-                        }
-                    }
-                    checkerTask.failOnMissingAttributions = shouldFailOnMissingAttributions
-
+                if (!variantInputFile.exists()) {
+                    throw new GradleException(variantInputFileName + " config file does not exist at location: " + variantInputFile.absolutePath)
                 }
 
-                project.tasks.preBuild.dependsOn(checkerTask)
+                def shouldFailOnMissingAttributions = false
+                if (variant.getBuildType().hasProperty("failOnMissingAttributions")) {
+                    shouldFailOnMissingAttributions = variant.getBuildType().failOnMissingAttributions
+                }
+
+                AttributionGenerationTask checkerTask = project.task("generate${variant.name.capitalize()}LicenseAttributions", type: AttributionGenerationTask) {
+                    outputFile = variantOutputFile
+                    inputFile = variantInputFile
+                    failOnMissingAttributions = shouldFailOnMissingAttributions
+                    variantDependencies = getVariantDependencies(project, variantBuildType, variantFlavor)
+                }
+
+                project.tasks.getByName("generate${variant.name.capitalize()}Assets").dependsOn(checkerTask)
             }
         }
     }
 
     /**
-     * Determines the gradle 'assemble' task that started this build.
-     * @param project
-     * @return the task name that started the build if it contains 'assemble' otherwise an empty string
+     * Get's the list of dependencies defined in the app's build.gradle file.
+     * @return a Set<String> containing the package for every app dependency
      */
-    def getStartTask(project) {
-        def tasks = project.getGradle().getStartParameter().getTaskRequests().args.toString().replace("[", "").replace("]", "").split(",")
-        return tasks.find { task -> task.contains("assemble") }
-    }
+    Set<String> getVariantDependencies(project, buildType, flavor) {
+        Set<String> dependenciesMap = new HashSet();
 
-    /**
-     * Returns the 'assemble' task to build this variant as a string.
-     * @param variant
-     * @return the assemble task for the supplied variant
-     */
-    def getVariantAssembleTask(variant) {
-        return variant.getAssemble().toString().replace("task", "").replace(" ", "").replace("\'", "")
-    }
+        project.configurations.each { conf ->
 
+            if (Utils.isConfigurationForCurrentVariant(conf.name, buildType, flavor)) {
+                conf.allDependencies.each { dep ->
+                    String packageName = dep.group + ":" + dep.name;
+                    if (!packageName.equals("null:unspecified")) {
+                        if (packageName.startsWith("null:")) {
+                            // If the lib was included from /libs folder
+                            packageName = packageName.replace("null:", "")
+                        }
+                        dependenciesMap.add(packageName)
+                    }
+                }
+            }
+        }
+
+        return dependenciesMap
+    }
 }

@@ -1,5 +1,6 @@
 package com.wardbonnefond.licensechecker
 
+import org.apache.maven.model.ConfigurationContainer
 import org.gradle.api.GradleException
 
 class Utils {
@@ -46,16 +47,10 @@ class Utils {
      * @param failOnMissingAttributions whether this check should throw an exception if there are missing attributions in the input file
      * @return
      */
-    static def checkAttributions(parser, dependencies, failOnMissingAttributions) {
+    static def checkAttributions(parser, dependencies) {
         parser.jsonConfig.libraries.each { k ->
-
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
-            }
-            else {
-                if (failOnMissingAttributions) {
-                    throw new GradleException("Could not find " + k.gradlePackage + " in attributions.json")
-                }
             }
         }
         return dependencies
@@ -68,17 +63,12 @@ class Utils {
      * @param failOnMissingAttributions whether this check should throw an exception if there are attributions in the input file
      * @return
      */
-    def static checkExcludedPackages(parser, dependencies, failOnMissingAttributions) {
+    def static checkExcludedPackages(parser, dependencies) {
         parser.jsonConfig.excludedLibraries.each { k ->
-
             if (dependencies.contains(k.gradlePackage)) {
                 dependencies.remove(k.gradlePackage)
             }
-            else {
-                if (failOnMissingAttributions) {
-                    throw new GradleException("Excluded package: " + k.gradlePackage + " in attributions.json but not a project dependency")
-                }
-            }
+
         }
         return dependencies
     }
@@ -87,7 +77,6 @@ class Utils {
         if (dependencies.isEmpty()) {
             logger.info("All dependencies accounted for in attributions.json")
             return true;
-
         }
         else {
             def count = 0
@@ -133,12 +122,40 @@ class Utils {
 
     }
 
-    def static buildHtmlOutput(parser) {
+    /**
+     * Determines if the provided configuration should be included as a dependency for the variant
+     * @param configuration the name of the configuration (compile, paidCompile, releaseCompile, etc.)
+     * @param buildType the buildType name
+     * @param flavor the flavor name
+     */
+    def static boolean isConfigurationForCurrentVariant(String configuration, String buildType, String flavor) {
+        if (configuration.equals("compile")) {
+            return true
+        }
+        configuration = configuration.toLowerCase()
+        if (configuration.contains("compile")) {
+            configuration = configuration.replace("compile", "")
+            if (!buildType.equals("") && configuration.replace(buildType, "").equals("")) {
+                return true
+            }
+            if (!flavor.equals("") && configuration.replace(flavor, "").equals("")) {
+                return true
+            }
+            if (configuration.replace(buildType, "").replace(flavor, "").equals("")) {
+                return true
+            }
+        }
+        return false
+    }
+
+    def static buildHtmlOutput(parser, Set dependencies) {
         String html = INDIVIDUAL_HTML;
         StringBuilder sb = new StringBuilder();
 
         parser.jsonConfig.libraries.each { k ->
-            sb.append(html.replace("{name}", k.name).replace("{legalText}", k.legalText));
+            if (dependencies.contains(k.gradlePackage)) {
+                sb.append(html.replace("{name}", k.name).replace("{legalText}", k.legalText));
+            }
         }
 
         return BASE_HTML.replace("{attributions}", sb.toString())

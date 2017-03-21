@@ -56,12 +56,11 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(2, Utils.checkAttributions(json, dependencies, true).size())
+        assertEquals(2, Utils.checkAttributions(json, dependencies).size())
 
     }
 
-
-    @Test(expected = GradleException.class)
+    @Test
     void testThrowsExceptionWhenPackageDoesntExist_FailOnMissing() {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.github.bumptech.glide:glide")
@@ -72,7 +71,7 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        Utils.checkAttributions(json, dependencies, true)
+        assertEquals(2,Utils.checkAttributions(json, dependencies).size())
     }
 
     @Test
@@ -85,10 +84,10 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(0, Utils.checkExcludedPackages(json, dependencies, true).size())
+        assertEquals(0, Utils.checkExcludedPackages(json, dependencies).size())
     }
 
-    @Test(expected = GradleException.class)
+    @Test
     void testCheckExcludedPackages_MorePackagesInConfig() {
         Set<String> dependencies = new HashSet<>();
         dependencies.add("com.android.support:appcompat-v7")
@@ -97,7 +96,7 @@ class UtilsTest {
         def json = new JsonParser()
         json.parse(jsonConfigFile)
 
-        assertEquals(1, Utils.checkExcludedPackages(json, dependencies, true).size())
+        assertEquals(0, Utils.checkExcludedPackages(json, dependencies).size())
     }
 
     @Test
@@ -183,6 +182,51 @@ class UtilsTest {
         def jsonConfigFile = getJsonConfigFileForTests('basic.json')
         def json = new JsonParser()
         json.parse(jsonConfigFile)
-        assertEquals(getOutputTextForTest('basic-output.txt'), Utils.buildHtmlOutput(json))
+        Set<String> dependencies = new HashSet<>()
+        dependencies.add("com.fake.library:fakelibrary")
+        dependencies.add("com.new:some-library")
+        dependencies.add("com.android.support:appcompat-v7")
+
+        assertEquals(getOutputTextForTest('basic-output.txt'), Utils.buildHtmlOutput(json, dependencies))
+    }
+
+    @Test
+    void testConfigurationForVariantCompile() {
+        assertTrue(Utils.isConfigurationForCurrentVariant("compile", "debug", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantCompileDebug() {
+        assertTrue(Utils.isConfigurationForCurrentVariant("debugCompile", "debug", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantPaidDebugCompile() {
+        assertTrue(Utils.isConfigurationForCurrentVariant("paidDebugCompile", "debug", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantReleaseCompile() {
+        assertFalse(Utils.isConfigurationForCurrentVariant("debugCompile", "release", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantFreeCompile() {
+        assertFalse(Utils.isConfigurationForCurrentVariant("freeCompile", "release", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantFreePaidCompile() {
+        assertFalse(Utils.isConfigurationForCurrentVariant("paidFreeCompile", "release", "paid"))
+    }
+
+    @Test
+    void testConfigurationForVariantDebugCompileReleaseEmpty() {
+        assertFalse(Utils.isConfigurationForCurrentVariant("debugCompile", "release", ""))
+    }
+
+    @Test
+    void testConfigurationForVariantDebugCompileEmpty() {
+        assertTrue(Utils.isConfigurationForCurrentVariant("debugCompile", "debug", ""))
     }
 }

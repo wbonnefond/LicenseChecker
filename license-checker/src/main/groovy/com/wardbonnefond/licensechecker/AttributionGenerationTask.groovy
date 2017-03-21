@@ -20,7 +20,8 @@ class AttributionGenerationTask extends DefaultTask {
     @Input
     def boolean failOnMissingAttributions
 
-    def String inputFileName
+    @Input
+    def Set<String> variantDependencies
 
     @TaskAction
     def generateLicenseAttributions(IncrementalTaskInputs inputs) {
@@ -29,35 +30,29 @@ class AttributionGenerationTask extends DefaultTask {
             project.delete(outputFile)
         }
         if (!inputFile.exists()) {
-            throw new GradleException(inputFileName + " does not exist")
+            throw new GradleException("attributions file does not exist")
         }
-
-        logger.info("Current variant has set failOnMissingAttributions=" + failOnMissingAttributions)
 
         inputs.outOfDate { InputFileDetails change ->
-            logger.info("$change.file.name has changed; regenerating attribution file")
+            logger.info("$change.file.name has changed; regenerating attribution HTML file")
         }
 
-        Set<String> dependenciesMap = buildDependenciesMap()
+        Set<String> dependencies = new HashSet<>(variantDependencies) // this is used after verifying attributions to create the output
 
-        def configFile = new File(project.projectDir, project.licenseChecker.inputFileName);
-        if (!configFile.exists()) {
-            throw new GradleException(inputFileName + " does not exist")
-        }
         def configParser = new JsonParser()
-        configParser.parse(configFile)
+        configParser.parse(inputFile)
 
         // First do some validation on the input
         Utils.jsonContainsDuplicates(configParser)
 
         // Check the attributions
-        dependenciesMap = Utils.checkAttributions(configParser, dependenciesMap, failOnMissingAttributions)
+        variantDependencies = Utils.checkAttributions(configParser, variantDependencies)
 
         // Check the excluded packages
-        dependenciesMap = Utils.checkExcludedPackages(configParser, dependenciesMap, failOnMissingAttributions)
+        variantDependencies = Utils.checkExcludedPackages(configParser, variantDependencies)
 
         // Ensure no dependencies are still in the set
-        Utils.ensureAllDependenciesAccountedFor(dependenciesMap, logger, failOnMissingAttributions)
+        Utils.ensureAllDependenciesAccountedFor(variantDependencies, logger, failOnMissingAttributions)
 
         // Create the ouput directory if it doesn't exist
         def assets = new File(project.projectDir, project.licenseChecker.outputFolder)
@@ -65,33 +60,6 @@ class AttributionGenerationTask extends DefaultTask {
             assets.mkdirs()
         }
 
-        outputFile.text = Utils.buildHtmlOutput(configParser)
+        outputFile.text = Utils.buildHtmlOutput(configParser, dependencies)
     }
-
-    /**
-     * Get's the list of dependencies defined in the app's build.gradle file.
-     * @return a Set<String> containing the package for every app dependency
-     */
-    Set<String> buildDependenciesMap() {
-        Set<String> dependenciesMap = new HashSet();
-
-        project.configurations.each { conf ->
-            if (conf.name.equals("compile")) {
-                conf.allDependencies.each { dep ->
-                    String packageName = dep.group + ":" + dep.name;
-                    if (!packageName.equals("null:unspecified")) {
-                        if (packageName.startsWith("null:")) {
-                            // If the lib was included from /libs folder
-                            packageName = packageName.replace("null:", "")
-                        }
-                        dependenciesMap.add(packageName)
-                    }
-                }
-            }
-        }
-
-        return dependenciesMap
-    }
-
-
 }
