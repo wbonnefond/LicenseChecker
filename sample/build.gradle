@@ -5,7 +5,7 @@ buildscript {
         //maven { url "https://dl.bintray.com/wbonnefond/gradle-plugins/" }
     }
     dependencies {
-        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.5'
+        classpath 'com.wardbonnefond.licensechecker:license-checker:0.1.6'
     }
 }
 
